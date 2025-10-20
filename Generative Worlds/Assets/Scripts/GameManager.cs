@@ -45,4 +45,17 @@ public class GameManager : MonoBehaviour
             player.enabled = true;
         }
     }
+
+    
+    // public void StartSpawning()
+    // {
+    //     if (EnemySpawner != null)
+    //         EnemySpawner.InvokeRepeating("SpawnRandomEnemy", 2f, 5f);
+    // }
+
+    // public void StopSpawning()
+    // {
+    //     if (EnemySpawner != null)
+    //         EnemySpawner.CancelInvoke("SpawnRandomEnemy");
+    // }
 }

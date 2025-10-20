@@ -9,10 +9,15 @@ public class CharacterControl : MonoBehaviour
     public float gravity = -9.81f;
 
     [Header("Mouse Look")]
-    public float mouseSensitivity = 200f;
+    public float mouseSensitivity = 1000f;
 
     [Header("Ground Check")]
     public LayerMask groundLayer;
+
+    [Header("Shooting")]
+    public GameObject bulletPrefab; // assign your bullet prefab
+    public float bulletSpeed = 20f;
+    public Transform firePoint; // point from where bullet is shot
 
     private CharacterController controller;
     public Vector3 velocity;
@@ -22,25 +27,30 @@ public class CharacterControl : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
         Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
 
-        // Optional: Register with GameManager (if not already assigned manually)
         if (GameManager.Instance != null && GameManager.Instance.player == null)
-        {
             GameManager.Instance.player = this;
-        }
     }
 
     private void Update()
     {
-        HandleMovement();
         HandleMouseLook();
+        HandleMovement();
         HandleJumpAndGravity();
+        HandleShooting();
 
-        // Example: Auto-respawn if player falls below world
+        // Simple respawn check
         if (transform.position.y < -10f)
-        {
-            GameManager.Instance.RespawnPlayer(Vector3.zero); // Replace with actual spawn point
-        }
+            GameManager.Instance.RespawnPlayer(Vector3.zero);
+    }
+
+    void HandleMouseLook()
+    {
+        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
+
+        // Rotate player left/right only (yaw)
+        transform.Rotate(Vector3.up * mouseX);
     }
 
     void HandleMovement()
@@ -52,26 +62,15 @@ public class CharacterControl : MonoBehaviour
         controller.Move(move * moveSpeed * Time.deltaTime);
     }
 
-    void HandleMouseLook()
-    {
-        float mouseX = Input.GetAxis("Mouse X");
-        transform.Rotate(Vector3.up * mouseX * mouseSensitivity * Time.deltaTime);
-    }
-
     void HandleJumpAndGravity()
     {
         isGrounded = IsGrounded();
-        Debug.Log($"Is Grounded: {isGrounded}");
 
         if (isGrounded && velocity.y < 0)
-        {
             velocity.y = -2f;
-        }
 
         if (Input.GetButtonDown("Jump") && isGrounded)
-        {
             velocity.y = Mathf.Sqrt(jumpForce * -2f * gravity);
-        }
 
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
@@ -83,4 +82,36 @@ public class CharacterControl : MonoBehaviour
         Vector3 rayOrigin = transform.position + Vector3.down * 0.1f;
         return Physics.Raycast(rayOrigin, Vector3.down, rayLength, groundLayer);
     }
+
+    void HandleShooting()
+    {
+        if (Input.GetMouseButtonDown(0)) // Left click
+        {
+            // Debug.Log("Left click detected!");
+
+            Shoot();
+        }
+    }
+
+    void Shoot()
+    {
+        if (bulletPrefab != null && firePoint != null)
+        {
+            GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+            Rigidbody rb = bullet.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.linearVelocity = firePoint.forward * bulletSpeed; // fixed property
+            }
+
+            // Debug message to confirm shooting
+            // Debug.Log("Bullet fired at position: " + firePoint.position + " with direction: " + firePoint.forward);
+        }
+        else
+        {
+            // Debug.LogWarning("Bullet prefab or firePoint is not assigned!");
+        }
+    }
+
+
 }
