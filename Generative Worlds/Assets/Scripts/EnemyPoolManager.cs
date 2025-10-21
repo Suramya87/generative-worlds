@@ -29,7 +29,6 @@ public class EnemyPoolManager : MonoBehaviour
                 GameObject obj = Instantiate(pool.prefab);
                 obj.SetActive(false);
                 pool.poolQueue.Enqueue(obj);
-                // Parent to this manager for cleanliness:
                 obj.transform.SetParent(transform);
             }
         }
@@ -47,13 +46,12 @@ public class EnemyPoolManager : MonoBehaviour
         }
         else
         {
-            // If pool exhausted, instantiate one (optional)
             enemyObj = Instantiate(pool.prefab);
         }
 
         enemyObj.SetActive(true);
         var enemyComp = enemyObj.GetComponent<Enemy>();
-        enemyComp?.OnSpawn(enemyObj.transform.position); // ensure health reset
+        enemyComp?.OnSpawn(enemyObj.transform.position); 
         return enemyObj;
     }
 
@@ -66,7 +64,6 @@ public class EnemyPoolManager : MonoBehaviour
             return;
         }
 
-        // Reset state and disable
         var enemyComp = enemy.GetComponent<Enemy>();
         enemyComp?.OnDespawn();
 
